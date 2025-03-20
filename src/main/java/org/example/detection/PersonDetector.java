@@ -5,6 +5,7 @@ import org.opencv.highgui.HighGui;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.HOGDescriptor;
 import org.opencv.videoio.VideoCapture;
+import org.opencv.videoio.Videoio;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,8 @@ public class PersonDetector {
         cameras.add(new VideoCapture(1));
         currentCamera = cameras.get(currentCameraIndex);
         inactiveCamera = cameras.get((currentCameraIndex + 1) % cameras.size());
+        currentCamera.set(Videoio.CAP_PROP_FPS, 30);
+
     }
 
     public void startDetection() {
@@ -42,7 +45,7 @@ public class PersonDetector {
 
                     detectPeople(frame, true);
 
-                    HighGui.imshow("People detection - Camera " + (currentCameraIndex + 1), frame);
+                    HighGui.imshow("People detection - Camera " + (currentCameraIndex), frame);
                     HighGui.waitKey(1);
                 }
 
@@ -50,9 +53,9 @@ public class PersonDetector {
                     switchingInProgress = true;
                     System.out.println("Pessoa detectada na câmera inativa! Trocando de câmera...");
                     switchCamera();
+
                 }
             }
-
         }).start();
     }
 
@@ -62,13 +65,13 @@ public class PersonDetector {
         MatOfDouble weights = new MatOfDouble();
 
 
-        hog.detectMultiScale(frame, detections, weights, 0, new Size(8, 8), new Size(0, 0), 1.05, 2, false);
+        hog.detectMultiScale(frame, detections, weights, 0, new Size(8, 8), new Size(32, 32), 1.1, 4, false);
 
 
         if (detections.toArray().length > 0) {
 
             for (Rect rect : detections.toArray()) {
-                Imgproc.rectangle(frame, rect.tl(), rect.br(), new Scalar(0, 255, 0), 3);
+                Imgproc.rectangle(frame, rect.tl(), rect.br(), new Scalar(0, 255, 0), 2);
             }
 
             if (isActiveCamera) {
@@ -83,7 +86,7 @@ public class PersonDetector {
 
             MatOfRect detections = new MatOfRect();
             MatOfDouble weights = new MatOfDouble();
-            hog.detectMultiScale(frame, detections, weights, 0, new Size(8, 8), new Size(0, 0), 1.05, 2, false);
+            hog.detectMultiScale(frame, detections, weights, 0, new Size(8, 8), new Size(6, 6), 1.05, 2, false);
 
             return detections.toArray().length > 0;
         }
@@ -92,10 +95,9 @@ public class PersonDetector {
 
     private void switchCamera() {
 
-        if (currentCamera != null && currentCamera.isOpened()) {
+        /*if (currentCamera != null && currentCamera.isOpened()) {
             currentCamera.release();
-        }
-
+        }*/
 
         currentCameraIndex++;
         if (currentCameraIndex >= cameras.size()) {
