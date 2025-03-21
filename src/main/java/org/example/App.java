@@ -8,16 +8,20 @@ public class App {
     static {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         System.load("C:\\Users\\User\\Downloads\\CamSwitchAI\\CamSwitchAI\\lib\\opencv_java4110.dll");
+
     }
 
     public static void main( String[] args ) {
-        PersonDetector detector = new PersonDetector();
-        detector.startDetection();
 
-        checkAvailableCameras();
+       /* PersonDetector detector = new PersonDetector();
+        detector.startDetection();*/
+
+        /*checkAvailableCameras();*/
+
+        new PersonDetector().run(args);
     }
 
-    public static void checkAvailableCameras(){
+   /* public static void checkAvailableCameras(){
         System.out.println("Verificando câmeras disponíveis...");
         for (int i = 0; i < 2; i++) {
             VideoCapture camera = new VideoCapture(i);
@@ -28,6 +32,6 @@ public class App {
                 System.out.println("Nenhuma câmera encontrada no índice: " + i);
             }
         }
-    }
+    }*/
 }
 

@@ -3,6 +3,7 @@ package org.example.detection;
 import org.opencv.core.*;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.objdetect.CascadeClassifier;
 import org.opencv.objdetect.HOGDescriptor;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.Videoio;
@@ -18,7 +19,8 @@ public class PersonDetector {
     private HOGDescriptor hog;
     private boolean switchingInProgress = false;
 
-    public PersonDetector() {
+
+    /*public PersonDetector() {
 
         initializeCameras();
         hog = new HOGDescriptor();
@@ -33,17 +35,37 @@ public class PersonDetector {
         inactiveCamera = cameras.get((currentCameraIndex + 1) % cameras.size());
         currentCamera.set(Videoio.CAP_PROP_FPS, 30);
 
-    }
+    }*/
 
-    public void startDetection() {
+    public void run(String[] args) {
+
+        String filenameFaceCascade = args.length > 2 ? args[0] : "C:\\Users\\User\\Downloads\\opencv\\sources\\data\\haarcascades\\haarcascade_frontalface_alt.xml";
+        int cameraDevice = args.length > 2 ? Integer.parseInt(args[2]) : 0;
+        CascadeClassifier faceCascade = new CascadeClassifier();
+
+        if(!faceCascade.load(filenameFaceCascade)){
+            System.out.println("Error loading face cascade " + filenameFaceCascade);
+        }
+
+        VideoCapture video = new VideoCapture(cameraDevice);
+        if(!video.isOpened()){
+            System.out.println("Error opening video capture");
+        }
+
+        Mat frame = new Mat();
         new Thread(() -> {
-            while (true) {
-                Mat frame = new Mat();
+            while (video.read(frame)) {
 
+                if(frame.empty()){
+                    System.out.println("Frame empty");
+                }
 
-                if (currentCamera.isOpened() && currentCamera.read(frame)) {
+                detectPeople(frame, faceCascade);
+                HighGui.waitKey(1);
 
-                    detectPeople(frame, true);
+                /*if (currentCamera.isOpened() && currentCamera.read(frame)) {
+
+                    detectPeople(frame, faceCascade);
 
                     HighGui.imshow("People detection - Camera " + (currentCameraIndex), frame);
                     HighGui.waitKey(1);
@@ -54,30 +76,29 @@ public class PersonDetector {
                     System.out.println("Pessoa detectada na câmera inativa! Trocando de câmera...");
                     switchCamera();
 
-                }
+                }*/
             }
         }).start();
     }
 
-    private void detectPeople(Mat frame, boolean isActiveCamera) {
+    public void detectPeople(Mat frame, CascadeClassifier faceCascade) {
 
-        MatOfRect detections = new MatOfRect();
-        MatOfDouble weights = new MatOfDouble();
+        MatOfRect faces = new MatOfRect();
+        //MatOfDouble weights = new MatOfDouble();
 
+        faceCascade.detectMultiScale(frame, faces);
 
-        hog.detectMultiScale(frame, detections, weights, 0, new Size(8, 8), new Size(32, 32), 1.1, 4, false);
+        if (faces.toArray().length > 0) {
 
-
-        if (detections.toArray().length > 0) {
-
-            for (Rect rect : detections.toArray()) {
+            for (Rect rect : faces.toArray()) {
                 Imgproc.rectangle(frame, rect.tl(), rect.br(), new Scalar(0, 255, 0), 2);
             }
 
-            if (isActiveCamera) {
+            /*if (isActiveCamera) {
                 switchingInProgress = false;
-            }
+            }*/
         }
+        HighGui.imshow("Capture - Face" + (currentCameraIndex), frame);
     }
 
     private boolean detectPeopleInInactiveCamera() {
@@ -86,7 +107,7 @@ public class PersonDetector {
 
             MatOfRect detections = new MatOfRect();
             MatOfDouble weights = new MatOfDouble();
-            hog.detectMultiScale(frame, detections, weights, 0, new Size(8, 8), new Size(6, 6), 1.05, 2, false);
+            hog.detectMultiScale(frame, detections, weights, 0, new Size(8, 8), new Size(4, 4), 1.1, 4, false);
 
             return detections.toArray().length > 0;
         }
