@@ -13,12 +13,10 @@ public class App {
 
     public static void main( String[] args ) {
 
-       /* PersonDetector detector = new PersonDetector();
-        detector.startDetection();*/
+        PersonDetector detector = new PersonDetector();
+        detector.startDetection();
 
         /*checkAvailableCameras();*/
-
-        new PersonDetector().run(args);
     }
 
    /* public static void checkAvailableCameras(){

@@ -7,7 +7,11 @@ import org.opencv.objdetect.CascadeClassifier;
 import org.opencv.objdetect.HOGDescriptor;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.Videoio;
+import org.w3c.dom.Document;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,18 +41,18 @@ public class PersonDetector {
 
     }*/
 
-    public void run(String[] args) {
+    public void startDetection() {
 
-        String filenameFaceCascade = args.length > 2 ? args[0] : "C:\\Users\\User\\Downloads\\opencv\\sources\\data\\haarcascades\\haarcascade_frontalface_alt.xml";
-        int cameraDevice = args.length > 2 ? Integer.parseInt(args[2]) : 0;
+        String path = "C:\\Users\\User\\Downloads\\opencv\\sources\\data\\haarcascades\\haarcascade_frontalface_alt.xml";
+        int cameraDevice = 0;
         CascadeClassifier faceCascade = new CascadeClassifier();
 
-        if(!faceCascade.load(filenameFaceCascade)){
-            System.out.println("Error loading face cascade " + filenameFaceCascade);
+        if (!faceCascade.load(path)) {
+            System.out.println("Error loading face cascade " + path);
         }
 
         VideoCapture video = new VideoCapture(cameraDevice);
-        if(!video.isOpened()){
+        if (!video.isOpened()) {
             System.out.println("Error opening video capture");
         }
 
@@ -56,7 +60,7 @@ public class PersonDetector {
         new Thread(() -> {
             while (video.read(frame)) {
 
-                if(frame.empty()){
+                if (frame.empty()) {
                     System.out.println("Frame empty");
                 }
 
@@ -80,6 +84,7 @@ public class PersonDetector {
             }
         }).start();
     }
+
 
     public void detectPeople(Mat frame, CascadeClassifier faceCascade) {
 
